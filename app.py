@@ -52,8 +52,9 @@ def get_openpose_filter(i):
 
     image = openpose(image)
     #image = Image.fromarray(image)
-    image.save("openpose_frame_" + str(i) + ".jpeg")
-    return "openpose_frame_" + str(i) + ".jpeg"
+    # image.save("openpose_frame_" + str(i) + ".jpeg")
+    # return "openpose_frame_" + str(i) + ".jpeg"
+    return image
 
 def create_video(frames, fps, type):
     print("building video result")
@@ -66,70 +67,36 @@ def convertG2V(imported_gif):
     clip = VideoFileClip(imported_gif.name)
     clip.write_videofile("my_gif_video.mp4")
     return "my_gif_video.mp4"
-    
-def infer(video_in):
-    
-    
-    # 1. break video into frames and get FPS
-    break_vid = get_frames(video_in)
-    frames_list= break_vid[0]
-    fps = break_vid[1]
-    #n_frame = int(trim_value*fps)
-    n_frame = len(frames_list)
-    
-    if n_frame >= len(frames_list):
-        print("video is shorter than the cut value")
-        n_frame = len(frames_list)
-    
-    # 2. prepare frames result arrays
-    result_frames = []
-    print("set stop frames to: " + str(n_frame))
-    
-    for i in frames_list[0:int(n_frame)]:
-        openpose_frame = get_openpose_filter(i)
-        result_frames.append(openpose_frame)
-        print("frame " + i + "/" + str(n_frame) + ": done;")
 
-    
-    final_vid = create_video(result_frames, fps, "openpose")
+# def infer_skeleton_images(mmpose, frame_path, output_path = "temp"):
+#     output_image_name = f"{os.path.split(frame_path)[-1].split('.')[0]}_pose.jpg"
+#     # mmpose_frame = get_mmpose_filter(mmpose, frame)
+#     image = mmpose(frame_path, fn_index=0)[1]
+#     image = Image.open(image)
+#     #image = Image.fromarray(image)
+#     image.save(os.path.join(output_path, output_image_name))
 
-    files = [final_vid]
+# if __name__ == "__main__":
+#     img_dir = "/home/adi/work/Dissertation/omnidata/omnidata_tools/torch/assets/extracted_frames_online_class"
+#     # mmpose = gr.Interface.load(name="spaces/fffiloni/mmpose-estimation")
+#     mmpose_client = Client("https://fffiloni/video2openpose2/")
+#     for img_name in os.listdir(img_dir):
+#         frame_path = os.path.join(img_dir, img_name)
+#         infer_skeleton_images(mmpose, frame_path)
 
-    return final_vid, files
+def infer(img_dir, output_path = "temp"):
+    # img_dir = "/home/adi/work/Dissertation/omnidata/omnidata_tools/torch/assets/extracted_frames_online_class"
+    # mmpose = gr.Interface.load(name="spaces/fffiloni/mmpose-estimation")
+    # mmpose_client = Client("https://fffiloni/video2openpose2/")
+    for img_name in os.listdir(img_dir):
+        frame_path = os.path.join(img_dir, img_name)
+        output_image_name =  f"{img_name.split('.')[0]}_pose.jpg"
+        frame_path = os.path.join(img_dir, img_name)
+        openpose_frame = get_openpose_filter(frame_path)
+        # image = Image.open(openpose_frame)
+        openpose_frame.save(os.path.join(output_path, output_image_name))
+        # result_frames.append(openpose_frame)
+        # print("frame " + i + "/" + str(n_frame) + ": done;")
 
-title="""
-<div style="text-align: center; max-width: 500px; margin: 0 auto;">
-        <div
-        style="
-            display: inline-flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-size: 1.75rem;
-            margin-bottom: 10px;
-        "
-        >
-        <h1 style="font-weight: 600; margin-bottom: 7px;">
-            Video to OpenPose
-        </h1>
-        </div>
-       
-    </div>
-"""
-
-with gr.Blocks() as demo:
-    with gr.Column():
-        gr.HTML(title)
-        with gr.Row():
-            with gr.Column():
-                video_input = gr.Video(source="upload", type="filepath")
-                gif_input = gr.File(label="import a GIF instead", file_types=['.gif'])
-                gif_input.change(fn=convertG2V, inputs=gif_input, outputs=video_input)
-                submit_btn = gr.Button("Submit")
-            
-            with gr.Column():
-                video_output = gr.Video()
-                file_output = gr.Files()
-
-    submit_btn.click(fn=infer, inputs=[video_input], outputs=[video_output, file_output])
-
-demo.launch()
+if __name__ == "__main__":
+    infer()
