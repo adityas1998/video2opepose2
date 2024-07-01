@@ -88,6 +88,8 @@ def infer(img_dir, output_path = "temp"):
     # img_dir = "/home/adi/work/Dissertation/omnidata/omnidata_tools/torch/assets/extracted_frames_online_class"
     # mmpose = gr.Interface.load(name="spaces/fffiloni/mmpose-estimation")
     # mmpose_client = Client("https://fffiloni/video2openpose2/")
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path)
     for img_name in os.listdir(img_dir):
         frame_path = os.path.join(img_dir, img_name)
         output_image_name =  f"{img_name.split('.')[0]}_pose.jpg"
@@ -99,4 +101,4 @@ def infer(img_dir, output_path = "temp"):
         # print("frame " + i + "/" + str(n_frame) + ": done;")
 
 if __name__ == "__main__":
-    infer()
+    infer(img_dir = "/data/scratch/ec23458/ubody_human_crops/", output_path = "/data/scratch/ec23458/ubody_human_crops_pose/")
